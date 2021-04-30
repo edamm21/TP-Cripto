@@ -1,0 +1,12 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/main.c
+stdio.h
+/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/stdio.h
+
