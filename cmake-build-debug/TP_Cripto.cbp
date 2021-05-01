@@ -78,6 +78,30 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/args_parser.c">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/args_parser.h">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/config.c">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/config.h">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/distribution.c">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/distribution.h">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/finding.c">
+			<Option target="TP_Cripto"/>
+		</Unit>
+		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/finding.h">
+			<Option target="TP_Cripto"/>
+		</Unit>
 		<Unit filename="/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/main.c">
 			<Option target="TP_Cripto"/>
 		</Unit>

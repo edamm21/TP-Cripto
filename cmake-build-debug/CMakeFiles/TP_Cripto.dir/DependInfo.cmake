@@ -4,6 +4,10 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
+  "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/args_parser.c" "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/cmake-build-debug/CMakeFiles/TP_Cripto.dir/src/args_parser.c.o"
+  "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/config.c" "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/cmake-build-debug/CMakeFiles/TP_Cripto.dir/src/config.c.o"
+  "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/distribution.c" "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/cmake-build-debug/CMakeFiles/TP_Cripto.dir/src/distribution.c.o"
+  "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/finding.c" "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/cmake-build-debug/CMakeFiles/TP_Cripto.dir/src/finding.c.o"
   "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/src/main.c" "/home/iuke/Documents/ITBA/CRIPTO/TP-Cripto/cmake-build-debug/CMakeFiles/TP_Cripto.dir/src/main.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
