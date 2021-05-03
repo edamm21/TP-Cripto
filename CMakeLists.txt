@@ -8,6 +8,5 @@ include_directories(src)
 add_executable(TP_Cripto
         src/main.c
         src/args_parser.c
-        src/config.c
         src/distribution.c
-        src/finding.c)
+        src/finding.c src/header_struct.h src/header_parser.c src/header_parser.h)

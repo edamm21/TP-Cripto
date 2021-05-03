@@ -9,7 +9,7 @@ int main(int argc, char * argv[]) {
     memset(&config, 0, sizeof(config));
     parseArgs(argc, argv, &config);
     if(config.type == 'd') {
-        runDistribution();
+        runDistribution(&config);
     } else {
         runFinding();
     }
