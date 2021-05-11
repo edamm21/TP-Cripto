@@ -9,4 +9,9 @@ add_executable(TP_Cripto
         src/main.c
         src/args_parser.c
         src/distribution.c
-        src/finding.c src/header_struct.h src/header_parser.c src/header_parser.h)
+        src/finding.c
+        src/header_struct.h
+        src/header_parser.c
+        src/header_parser.h
+        src/common/helper.c
+        src/common/helper.h)

@@ -4,7 +4,7 @@
 
 #ifndef HEADER_PARSER_H
 #define HEADER_PARSER_H
-
+#include <stdint.h>
 enum header_parser_states {
     READ_SIGNATURE,
     READ_FILE_SIZE,
@@ -30,6 +30,6 @@ struct header_parser {
     int inner_counter;
 };
 
-struct header * parseHeader(unsigned char * header);
+struct header * parseHeader(uint8_t * header);
 
 #endif //HEADER_PARSER_H

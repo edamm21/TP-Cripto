@@ -1,15 +1,15 @@
-//
-// Created by iuke on 5/1/21.
-//
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#ifndef TP_CRIPTO_CONFIG_H
-#define TP_CRIPTO_CONFIG_H
+#define MAX_SHADE_COUNT 20
 
 struct config {
     char type;
     char imageFile[255];
     int k;
     char directory[255];
+    int shadeCount;
+    char * shadeNames[MAX_SHADE_COUNT];
 };
 
-#endif //TP_CRIPTO_CONFIG_H
+#endif //CONFIG_H

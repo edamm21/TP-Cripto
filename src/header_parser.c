@@ -6,11 +6,11 @@
 #include "header_struct.h"
 #include "header_parser.h"
 
-static bool isValidSignature(unsigned char signature[2]) {
+static bool isValidSignature(const uint8_t * signature) {
     return signature[0] == 'B' && signature[1] == 'M';
 }
 
-static enum header_parser_states feedToParser(unsigned char b, struct header_parser * parser, struct header * header) {
+static enum header_parser_states feedToParser(uint8_t b, struct header_parser * parser, struct header * header) {
     switch (parser->state) {
         case READ_SIGNATURE:
             header->signature[parser->inner_counter++] = b;
@@ -24,7 +24,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_FILE_SIZE:
-            header->fileSize += (int)b;
+            header->fileSize = (header->fileSize << (8 * parser->inner_counter)) | b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_RESERVED;
@@ -39,7 +39,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_DATA_OFFSET:
-            header->dataOffset += (int)b;
+            header->dataOffset = header->dataOffset * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_SIZE;
@@ -47,7 +47,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_SIZE:
-            header->size += (int)b;
+            header->size = header->size * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_WIDTH;
@@ -55,7 +55,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_WIDTH:
-            header->width += (int)b;
+            header->width = header->width * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_HEIGHT;
@@ -63,7 +63,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_HEIGHT:
-            header->height += (int)b;
+            header->height = header->height * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_PLANES;
@@ -71,7 +71,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_PLANES:
-            header->planes += (int)b;
+            header->planes = header->planes * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 2) {
                 parser->state = READ_BPP;
@@ -79,7 +79,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_BPP:
-            header->bitsPerPixel += (int)b;
+            header->bitsPerPixel = header->bitsPerPixel * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 2) {
                 parser->state = READ_COMPRESSION;
@@ -87,7 +87,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_COMPRESSION:
-            header->compression += (int)b;
+            header->compression = header->compression * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_IMAGE_SIZE;
@@ -95,7 +95,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_IMAGE_SIZE:
-            header->imageSize += (int)b;
+            header->imageSize = header->imageSize * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_XPPM;
@@ -103,7 +103,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_XPPM:
-            header->xPixelsPerM += (int)b;
+            header->xPixelsPerM = header->xPixelsPerM * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_YPPM;
@@ -111,7 +111,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_YPPM:
-            header->yPixelsPerM += (int)b;
+            header->yPixelsPerM = header->yPixelsPerM * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_COLORS;
@@ -119,7 +119,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_COLORS:
-            header->colorsUsed += (int)b;
+            header->colorsUsed = header->colorsUsed * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = READ_IMPORTANT_COLORS;
@@ -127,7 +127,7 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
             }
             break;
         case READ_IMPORTANT_COLORS:
-            header->importantColors += (int)b;
+            header->importantColors = header->importantColors * 16 + (int)b;
             parser->inner_counter++;
             if(parser->inner_counter == 4) {
                 parser->state = END;
@@ -141,14 +141,13 @@ static enum header_parser_states feedToParser(unsigned char b, struct header_par
     return parser->state;
 }
 
-struct header * parseHeader(unsigned char * header) {
+struct header * parseHeader(uint8_t * header) {
     struct header * headerStruct = calloc(1, sizeof(struct header));
     if(header == NULL)
         return NULL;
     struct header_parser parser;
     parser.inner_counter = 0;
     parser.state = READ_SIGNATURE;
-    unsigned char c;
     int i = 0;
     int offset = (int)header[10] + (int)header[11] + (int)header[12] + (int)header[13] - 1;
     enum header_parser_states currentState = parser.state;

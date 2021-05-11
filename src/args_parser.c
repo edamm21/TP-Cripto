@@ -53,13 +53,24 @@ static void checkFileExistence(char * path) {
     fclose(f);
 }
 
-static void checkDirectory(char * path) {
-    DIR * d = opendir(path);
+static int checkDirectory(struct config * config) {
+    DIR * d = opendir(config->directory);
     if(d == NULL || errno == ENOENT) {
         fprintf(stderr, "Directory does not exist. Check path.\n");
         exit(1);
     }
+    struct dirent * dir;
+    int fileCount = 0;
+    while((dir = readdir(d)) != NULL) {
+        if(strcmp(dir->d_name, ".") != 0 && strcmp(dir->d_name, "..") != 0) {
+            fileCount++;
+            if(fileCount == MAX_SHADE_COUNT) break;
+            config->shadeNames[fileCount - 1] = malloc(strlen(dir->d_name) + 1);
+            strcpy(config->shadeNames[fileCount - 1], dir->d_name);
+        }
+    }
     closedir(d);
+    return fileCount;
 }
 
 // [d-k] [file] [k] [directory]
@@ -93,7 +104,7 @@ void parseArgs(int argc, char **argv, struct config * config) {
         if(config->type == 'd') {
             checkFileExistence(config->imageFile);
         }
-        checkDirectory(config->directory);
+        config->shadeCount = checkDirectory(config);
         return;
     } else {
         fprintf(stderr, "Error in arguments passed. Try h for help.\n");
