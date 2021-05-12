@@ -3,6 +3,7 @@
 //
 #include <stdlib.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "header_struct.h"
 #include "header_parser.h"
 
@@ -10,7 +11,11 @@ static bool isValidSignature(const uint8_t * signature) {
     return signature[0] == 'B' && signature[1] == 'M';
 }
 
-static enum header_parser_states feedToParser(uint8_t b, struct header_parser * parser, struct header * header) {
+static int hexToDec(const uint8_t tmp[4]) {
+    return tmp[0] | tmp[1] << 8 | tmp[2] << 16 | tmp[3] << 24;
+}
+
+static enum header_parser_states feedToParser(uint8_t b, struct header_parser * parser, struct header * header, unsigned char tmp[4]) {
     switch (parser->state) {
         case READ_SIGNATURE:
             header->signature[parser->inner_counter++] = b;
@@ -24,9 +29,9 @@ static enum header_parser_states feedToParser(uint8_t b, struct header_parser * 
             }
             break;
         case READ_FILE_SIZE:
-            header->fileSize = (header->fileSize << (8 * parser->inner_counter)) | b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->fileSize = hexToDec(tmp);
                 parser->state = READ_RESERVED;
                 parser->inner_counter = 0;
             }
@@ -39,97 +44,97 @@ static enum header_parser_states feedToParser(uint8_t b, struct header_parser * 
             }
             break;
         case READ_DATA_OFFSET:
-            header->dataOffset = header->dataOffset * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->dataOffset = hexToDec(tmp);
                 parser->state = READ_SIZE;
                 parser->inner_counter = 0;
             }
             break;
         case READ_SIZE:
-            header->size = header->size * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->size = hexToDec(tmp);
                 parser->state = READ_WIDTH;
                 parser->inner_counter = 0;
             }
             break;
         case READ_WIDTH:
-            header->width = header->width * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->width = hexToDec(tmp);
                 parser->state = READ_HEIGHT;
                 parser->inner_counter = 0;
             }
             break;
         case READ_HEIGHT:
-            header->height = header->height * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->height = hexToDec(tmp);
                 parser->state = READ_PLANES;
                 parser->inner_counter = 0;
             }
             break;
         case READ_PLANES:
-            header->planes = header->planes * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 2) {
+                header->planes = hexToDec(tmp);
                 parser->state = READ_BPP;
                 parser->inner_counter = 0;
             }
             break;
         case READ_BPP:
-            header->bitsPerPixel = header->bitsPerPixel * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 2) {
+                header->bitsPerPixel = hexToDec(tmp);
                 parser->state = READ_COMPRESSION;
                 parser->inner_counter = 0;
             }
             break;
         case READ_COMPRESSION:
-            header->compression = header->compression * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->compression = hexToDec(tmp);
                 parser->state = READ_IMAGE_SIZE;
                 parser->inner_counter = 0;
             }
             break;
         case READ_IMAGE_SIZE:
-            header->imageSize = header->imageSize * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->imageSize = hexToDec(tmp);
                 parser->state = READ_XPPM;
                 parser->inner_counter = 0;
             }
             break;
         case READ_XPPM:
-            header->xPixelsPerM = header->xPixelsPerM * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->xPixelsPerM = hexToDec(tmp);
                 parser->state = READ_YPPM;
                 parser->inner_counter = 0;
             }
             break;
         case READ_YPPM:
-            header->yPixelsPerM = header->yPixelsPerM * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->yPixelsPerM = hexToDec(tmp);
                 parser->state = READ_COLORS;
                 parser->inner_counter = 0;
             }
             break;
         case READ_COLORS:
-            header->colorsUsed = header->colorsUsed * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->colorsUsed = hexToDec(tmp);
                 parser->state = READ_IMPORTANT_COLORS;
                 parser->inner_counter = 0;
             }
             break;
         case READ_IMPORTANT_COLORS:
-            header->importantColors = header->importantColors * 16 + (int)b;
-            parser->inner_counter++;
+            tmp[parser->inner_counter++] = b;
             if(parser->inner_counter == 4) {
+                header->importantColors = hexToDec(tmp);
                 parser->state = END;
                 parser->inner_counter = 0;
             }
@@ -151,8 +156,9 @@ struct header * parseHeader(uint8_t * header) {
     int i = 0;
     int offset = (int)header[10] + (int)header[11] + (int)header[12] + (int)header[13] - 1;
     enum header_parser_states currentState = parser.state;
+    unsigned char tmp[4];
     while(i < offset && currentState != ERROR && currentState != END) {
-        currentState = feedToParser(header[i], &parser, headerStruct);
+        currentState = feedToParser(header[i], &parser, headerStruct, tmp);
         i++;
     }
     return headerStruct;

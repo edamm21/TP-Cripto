@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(TP_Cripto C)
+project(TP_Cripto)
 
 set(CMAKE_C_STANDARD 11)
 
@@ -15,3 +15,5 @@ add_executable(TP_Cripto
         src/header_parser.h
         src/common/helper.c
         src/common/helper.h)
+
+target_link_libraries(TP_Cripto m)

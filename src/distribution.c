@@ -49,34 +49,76 @@ void runDistribution(struct config * config) {
             correspondingBlock++;
         }
     }
-
-    uint8_t ** shades[config->shadeCount];
-    readShadeFiles(shades, config->shadeCount, config->shadeNames, config->directory);
-
+    const long matrixCount = L / 4;
+    uint8_t *** shades = readShadeFiles(config->shadeCount, config->shadeNames, config->directory);
+    distributeImage(dividedInBlocks, shades, blockCount, config->shadeCount, matrixCount, config->k);
     // Para no olvidarnos
     free(headerStruct);
+    freeShadeMatrix(shades, config->shadeCount, matrixCount);
 }
 
-void readShadeFiles(uint8_t *** shades, int shadeCount, char * shadeNames[MAX_SHADE_COUNT], char * directory) {
+uint8_t *** readShadeFiles(int shadeCount, char * shadeNames[MAX_SHADE_COUNT], char * directory) {
+    uint8_t *** shades = malloc(shadeCount * sizeof(uint8_t**));
     for(int i = 0 ; i < shadeCount ; i++) {
         long fileSize;
         char * completePath = malloc(strlen(directory) + strlen(shadeNames[i]) + 1);
         strcpy(completePath, directory);
         strcat(completePath, shadeNames[i]);
+        printf("%s\n", completePath);
         uint8_t * fileData = readFile(completePath, &fileSize);
         if(fileData == NULL)
-            return;
+            return NULL;
         struct header * headerStruct = parseHeader(fileData);
         if(headerStruct == NULL) {
             free(fileData);
             fprintf(stderr, "Error creating header structure from BMP image!");
-            return;
+            return NULL;
         }
         long L = fileSize - headerStruct->dataOffset;
         uint8_t * bitmap = fileData + headerStruct->dataOffset;
-        int numberOf2x2Matrices = L / 4;
+        int numberOfXWYZMatrices = L / 4;
+        shades[i] = malloc(sizeof(uint8_t*) * numberOfXWYZMatrices);
+        for(int blockCount = 0 ; blockCount < numberOfXWYZMatrices ; blockCount++) {
+            int ul = blockCount * 2;
+            int ur = ul + 1;
+            int bl = ul + headerStruct->width;
+            int br = bl + 1;
+            shades[i][blockCount] = malloc(sizeof(uint8_t) * 4);
+            shades[i][blockCount][0] = bitmap[ul];
+            shades[i][blockCount][1] = bitmap[ur];
+            shades[i][blockCount][2] = bitmap[bl];
+            shades[i][blockCount][3] = bitmap[br];
+        }
         free(completePath);
         free(fileData);
         free(headerStruct);
     }
+    return shades;
+}
+
+void distributeImage(uint8_t ** blocks, uint8_t *** shades, long blockCount, int shadeCount, long innerMatrixCount, int k) {
+    for(int blockIndex = 0 ; blockIndex < blockCount ; blockIndex++) {
+        for (int shadeIndex = 0; shadeIndex < shadeCount; shadeIndex++) {
+            for(int innerMatrixIndex = 0 ; innerMatrixIndex < innerMatrixCount ; innerMatrixIndex++) {
+                uint8_t X_i_j = shades[shadeIndex][innerMatrixIndex][0];
+                char * F_X_i_j = evaluatePolynomial(blocks[blockIndex], X_i_j, k);
+                char p = calculateParityBit(F_X_i_j);
+                for(int bit = 0 ; bit < 8 ; bit++) {
+                    if(bit < 3)
+                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, shades[shadeIndex][innerMatrixIndex][1]);
+                    else if(bit < 6)
+                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, shades[shadeIndex][innerMatrixIndex][2]);
+                    else
+                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, shades[shadeIndex][innerMatrixIndex][3]);
+                }
+                insertIntoLeastSignificantBits(p, 2, shades[shadeIndex][innerMatrixIndex][3]);
+                free(F_X_i_j);
+            }
+        }
+    }
+}
+
+// TODO
+void insertIntoLeastSignificantBits(char bit, int index, uint8_t cell) {
+    return;
 }
