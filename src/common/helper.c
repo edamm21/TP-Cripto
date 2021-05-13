@@ -51,7 +51,7 @@ char * intToBinary(uint8_t num) {
 char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k) {
     int accum = 0;
     for(int term = 0 ; term < k ; term++) {
-        accum += multiply(block[term], powerValue(X_i_j, k - 1 - term));
+        accum += multiply(block[term], powerValue(X_i_j, term));
     }
     return intToBinary(accum);
 }
@@ -67,7 +67,7 @@ char calculateParityBit(char F[8]) {
 uint8_t binaryToInt(const char * bits) {
     uint8_t out = 0;
     for(int i = 7 ; i >= 0 ; i--) {
-        out += bits[7 - 0] == '1' ? (int)pow(2, i) : 0;
+        out += bits[7 - i] == '1' ? (int)pow(2, i) : 0;
     }
     return out;
 }

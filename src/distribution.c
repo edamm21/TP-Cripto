@@ -122,6 +122,7 @@ void distributeImage(uint8_t ** blocks, uint8_t *** shades, long blockCount, int
 // TODO
 void insertIntoLeastSignificantBits(char bit, int index, uint8_t * cell) {
     char * bits = intToBinary(*cell);
-    bits[index] = bit;
+    bits[5 + index] = bit;
     *cell = binaryToInt(bits);
+    free(bits);
 }
