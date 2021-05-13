@@ -39,17 +39,21 @@ int powerValue(uint8_t x, int power) {
     return multiply(x, powerValue(x, power - 1));
 }
 
-char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k) {
+char * intToBinary(uint8_t num) {
     char * out = malloc(8);
-    int accum = 0;
-    for(int term = 0 ; term < k ; term ++) {
-        accum += powerValue(X_i_j, k - 1 - term);
-    }
     int bit = 0;
     for(unsigned char i = 0x80 ; i ; i >>= 1) {
-        out[bit++] = accum & i ? '1' : '0';
+        out[bit++] = num & i ? '1' : '0';
     }
     return out;
+}
+
+char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k) {
+    int accum = 0;
+    for(int term = 0 ; term < k ; term++) {
+        accum += multiply(block[term], powerValue(X_i_j, k - 1 - term));
+    }
+    return intToBinary(accum);
 }
 
 char calculateParityBit(char F[8]) {
@@ -58,4 +62,12 @@ char calculateParityBit(char F[8]) {
         pByte = add(pByte, F[i]);
     }
     return pByte ? '1' : '0';
+}
+
+uint8_t binaryToInt(const char * bits) {
+    uint8_t out = 0;
+    for(int i = 7 ; i >= 0 ; i--) {
+        out += bits[7 - 0] == '1' ? (int)pow(2, i) : 0;
+    }
+    return out;
 }

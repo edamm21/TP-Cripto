@@ -40,13 +40,15 @@ void runDistribution(struct config * config) {
     // tengo que subdividir los datos secretos en bloques de k bytes
     int bytesCount = config->k;
     long blockCount = L / bytesCount; // L / k
-    uint8_t dividedInBlocks[blockCount][bytesCount];
+    //uint8_t dividedInBlocks[blockCount][bytesCount];
+    uint8_t ** dividedInBlocks = malloc(blockCount * sizeof(uint8_t*));
+    dividedInBlocks[0] = malloc(bytesCount * sizeof(uint8_t));
     int correspondingBlock = 0;
     for(int i = 0 ; i < L ; i++) {
         int correspondingElementInBlock = i % (bytesCount);
         dividedInBlocks[correspondingBlock][correspondingElementInBlock] = bitmap[i];
         if(correspondingElementInBlock == (bytesCount - 1)) {
-            correspondingBlock++;
+            dividedInBlocks[++correspondingBlock] = malloc(bytesCount * sizeof(uint8_t));
         }
     }
     const long matrixCount = L / 4;
@@ -64,7 +66,6 @@ uint8_t *** readShadeFiles(int shadeCount, char * shadeNames[MAX_SHADE_COUNT], c
         char * completePath = malloc(strlen(directory) + strlen(shadeNames[i]) + 1);
         strcpy(completePath, directory);
         strcat(completePath, shadeNames[i]);
-        printf("%s\n", completePath);
         uint8_t * fileData = readFile(completePath, &fileSize);
         if(fileData == NULL)
             return NULL;
@@ -105,13 +106,13 @@ void distributeImage(uint8_t ** blocks, uint8_t *** shades, long blockCount, int
                 char p = calculateParityBit(F_X_i_j);
                 for(int bit = 0 ; bit < 8 ; bit++) {
                     if(bit < 3)
-                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, shades[shadeIndex][innerMatrixIndex][1]);
+                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, &shades[shadeIndex][innerMatrixIndex][1]);
                     else if(bit < 6)
-                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, shades[shadeIndex][innerMatrixIndex][2]);
+                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, &shades[shadeIndex][innerMatrixIndex][2]);
                     else
-                        insertIntoLeastSignificantBits(F_X_i_j[bit], bit % 3, shades[shadeIndex][innerMatrixIndex][3]);
+                        insertIntoLeastSignificantBits(F_X_i_j[bit], (bit + 1) % 3, &shades[shadeIndex][innerMatrixIndex][3]);
                 }
-                insertIntoLeastSignificantBits(p, 2, shades[shadeIndex][innerMatrixIndex][3]);
+                insertIntoLeastSignificantBits(p, 0, &shades[shadeIndex][innerMatrixIndex][3]);
                 free(F_X_i_j);
             }
         }
@@ -119,6 +120,8 @@ void distributeImage(uint8_t ** blocks, uint8_t *** shades, long blockCount, int
 }
 
 // TODO
-void insertIntoLeastSignificantBits(char bit, int index, uint8_t cell) {
-    return;
+void insertIntoLeastSignificantBits(char bit, int index, uint8_t * cell) {
+    char * bits = intToBinary(*cell);
+    bits[index] = bit;
+    *cell = binaryToInt(bits);
 }
