@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <common/helper.h>
+#include <stdbool.h>
 #include "distribution.h"
 #include "config.h"
 #include "header_parser.h"
@@ -54,12 +55,13 @@ void runDistribution(struct config *config) {
     const long matrixCount = L / 4;
     uint8_t ***shades = readShadeFiles(config->shadeCount, config->shadeNames, config->directory);
     distributeImage(dividedInBlocks, shades, blockCount, config->shadeCount, matrixCount, config->k);
+    writeOutputFile(shades, config, headerStruct);
     // Para no olvidarnos
     free(headerStruct);
     freeShadeMatrix(shades, config->shadeCount, matrixCount);
 }
 
-uint8_t ***readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory) {
+uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory) {
     uint8_t ***shades = malloc(shadeCount * sizeof(uint8_t **));
     for (int i = 0; i < shadeCount; i++) {
         long fileSize;
@@ -123,4 +125,44 @@ void insertIntoLeastSignificantBits(char bit, int index, uint8_t *cell) {
     bits[5 + index] = bit;
     *cell = binaryToInt(bits);
     free(bits);
+}
+
+void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header) {
+    for(int i = 0 ; i < config->shadeCount ; i++) {
+        char * testDir = malloc(strlen("test-images-out/") + strlen(config->shadeNames[i]) + 1);
+        strcat(testDir, "test-images-out/");
+        strcat(testDir, config->shadeNames[i]);
+        FILE * f = fopen(testDir, "wb");
+        fseek(f, header->dataOffset, SEEK_SET);
+        int cantidadDePasadas = (int)(header->width / 2);
+        int totalElements = header->width * header->height;
+        int elementsInserted = 0;
+        int pasadaActual = 0;
+        while(elementsInserted < totalElements) {
+            bool primerMitad = true;
+            for(int contadorBloque = 0; contadorBloque < header->width ; contadorBloque++) {
+                if(primerMitad) {
+                    fwrite(&shades[i][contadorBloque % cantidadDePasadas + cantidadDePasadas * pasadaActual][0], sizeof(uint8_t), 1, f);
+                    elementsInserted++;
+                    fseek(f, header->dataOffset + elementsInserted, SEEK_SET);
+                    fwrite(&shades[i][contadorBloque % cantidadDePasadas + cantidadDePasadas * pasadaActual][1], sizeof(uint8_t), 1, f);
+                    elementsInserted++;
+                    fseek(f, header->dataOffset + elementsInserted, SEEK_SET);
+                } else {
+                    fwrite(&shades[i][contadorBloque % cantidadDePasadas + cantidadDePasadas * pasadaActual][2], sizeof(uint8_t), 1, f);
+                    elementsInserted++;
+                    fseek(f, header->dataOffset + elementsInserted, SEEK_SET);
+                    fwrite(&shades[i][contadorBloque % cantidadDePasadas + cantidadDePasadas * pasadaActual][3], sizeof(uint8_t), 1, f);
+                    elementsInserted++;
+                    fseek(f, header->dataOffset + elementsInserted, SEEK_SET);
+
+                }
+                if(contadorBloque == (cantidadDePasadas - 1)) {
+                    primerMitad = false;
+                }
+            }
+            pasadaActual++;
+        }
+        fclose(f);
+    }
 }
