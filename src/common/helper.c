@@ -51,17 +51,17 @@ char * intToBinary(uint8_t num) {
 char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k) {
     int accum = 0;
     for(int term = 0 ; term < k ; term++) {
-        accum += multiply(block[term], powerValue(X_i_j, term));
+        accum = add(accum,multiply(block[term], powerValue(X_i_j, term)));
     }
     return intToBinary(accum);
 }
 
 char calculateParityBit(char F[8]) {
-    uint8_t pByte = 0;
-    for(int i = 0 ; i < 8 ; i++) {
-        pByte = add(pByte, F[i]);
+    char pByte = F[0];
+    for(int i = 1 ; i < 8 ; i++) {
+        pByte = pByte == F[i] ? '0' : '1';
     }
-    return pByte ? '1' : '0';
+    return pByte;
 }
 
 uint8_t binaryToInt(const char * bits) {
