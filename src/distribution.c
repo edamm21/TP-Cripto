@@ -55,7 +55,7 @@ void runDistribution(struct config *config) {
     const long matrixCount = L / 4;
     uint8_t ***shades = readShadeFiles(config->shadeCount, config->shadeNames, config->directory);
     distributeImage(dividedInBlocks, shades, blockCount, config->shadeCount, matrixCount, config->k);
-    writeOutputFile(shades, config, headerStruct);
+    writeOutputFile(shades, config, headerStruct, fileData);
     // Para no olvidarnos
     free(headerStruct);
     freeShadeMatrix(shades, config->shadeCount, matrixCount);
@@ -127,13 +127,13 @@ void insertIntoLeastSignificantBits(char bit, int index, uint8_t *cell) {
     free(bits);
 }
 
-void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header) {
+void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header, const uint8_t * headerBytes) {
     for(int i = 0 ; i < config->shadeCount ; i++) {
         char * testDir = malloc(strlen("test-images-out/") + strlen(config->shadeNames[i]) + 1);
-        strcat(testDir, "test-images-out/");
+        strcpy(testDir, "test-images-out/");
         strcat(testDir, config->shadeNames[i]);
-        FILE * f = fopen(testDir, "wb");
-        fseek(f, header->dataOffset, SEEK_SET);
+        FILE * f = fopen(testDir, "w+b");
+        fwrite(headerBytes, sizeof(uint8_t), header->dataOffset, f);
         int cantidadDePasadas = (int)(header->width / 2);
         int totalElements = header->width * header->height;
         int elementsInserted = 0;
