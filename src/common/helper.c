@@ -74,28 +74,37 @@ uint8_t binaryToInt(const char * bits) {
     return out;
 }
 
-uint8_t getValidX_i_j(uint8_t ***shades, int totalShades, int innerMatrixIndex) {
-    uint8_t currentX_i_j = shades[totalShades][innerMatrixIndex][0];
-    uint8_t aux_X_i_j_array[totalShades];
+uint8_t updateXValue(uint8_t x) {
+    int new_x_value = x + 1;
+    uint8_t new_x_value_mod = new_x_value % 255;
+    return new_x_value != new_x_value_mod ? x - new_x_value_mod : new_x_value;
+}
+
+uint8_t getValidX_i_j(uint8_t ***shades, int maxShadeIdx, int innerMatrixIndex) {
+    if(maxShadeIdx == 0) {
+        return shades[maxShadeIdx][innerMatrixIndex][0];
+    }
+    uint8_t currentX_i_j = shades[maxShadeIdx][innerMatrixIndex][0];
+    uint8_t aux_X_i_j_array[maxShadeIdx];
     int aux_X_i_j_array_count = 0;
-    for (int currentShadeIdx = 0; currentShadeIdx < totalShades; ++currentShadeIdx) {
+    for (int currentShadeIdx = 0; currentShadeIdx < maxShadeIdx; ++currentShadeIdx) {
         uint8_t X_i_j = shades[currentShadeIdx][innerMatrixIndex][0];
         if (X_i_j > currentX_i_j) {
             aux_X_i_j_array[aux_X_i_j_array_count] = X_i_j;
             aux_X_i_j_array_count++;
         } else if (X_i_j == currentX_i_j) {
-            currentX_i_j = add(currentX_i_j,1);
+            currentX_i_j = updateXValue(currentX_i_j);
             int idx = 0;
             bool isValid = false;
-            while (!isValid) {
+            while (!isValid && idx < aux_X_i_j_array_count) {
                 uint8_t aux = aux_X_i_j_array[idx];
                 if (aux == currentX_i_j) {
-                    currentX_i_j = add(currentX_i_j,1);
+                    currentX_i_j = updateXValue(currentX_i_j);
                     idx = 0;
                 } else {
                     idx++;
                 }
-                if (idx == totalShades) isValid = true;
+                if (idx == maxShadeIdx) isValid = true;
             }
         }
     }

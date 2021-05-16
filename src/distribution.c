@@ -104,6 +104,7 @@ void distributeImage(uint8_t **blocks, uint8_t ***shades, long blockCount, int s
     for (int shadeIndex = 0; shadeIndex < shadeCount; shadeIndex++) {
         for (int innerMatrixIndex = 0; innerMatrixIndex < blockCount; innerMatrixIndex++) {
             uint8_t X_i_j = getValidX_i_j(shades, shadeIndex, innerMatrixIndex);
+            *shades[shadeIndex][innerMatrixIndex] = X_i_j;
             char *F_X_i_j = evaluatePolynomial(blocks[innerMatrixIndex], X_i_j, k);
             char p = calculateParityBit(F_X_i_j);
             for (int bit = 0; bit < 8; bit++) {
