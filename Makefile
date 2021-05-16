@@ -67,10 +67,10 @@ RM = /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/eugedamm/Documents/ITBA/CRIPTO/TP-Cripto
+CMAKE_SOURCE_DIR = /Users/nachograsso/Desktop/ITBA/CRIPTO/TP-Cripto
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/eugedamm/Documents/ITBA/CRIPTO/TP-Cripto
+CMAKE_BINARY_DIR = /Users/nachograsso/Desktop/ITBA/CRIPTO/TP-Cripto
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -99,9 +99,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/eugedamm/Documents/ITBA/CRIPTO/TP-Cripto/CMakeFiles /Users/eugedamm/Documents/ITBA/CRIPTO/TP-Cripto//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/nachograsso/Desktop/ITBA/CRIPTO/TP-Cripto/CMakeFiles /Users/nachograsso/Desktop/ITBA/CRIPTO/TP-Cripto//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/eugedamm/Documents/ITBA/CRIPTO/TP-Cripto/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/nachograsso/Desktop/ITBA/CRIPTO/TP-Cripto/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -169,32 +169,32 @@ src/args_parser.c.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/args_parser.c.s
 .PHONY : src/args_parser.c.s
 
-src/config.o: src/config.c.o
+src/common/helper.o: src/common/helper.c.o
 
-.PHONY : src/config.o
+.PHONY : src/common/helper.o
 
 # target to build an object file
-src/config.c.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/config.c.o
-.PHONY : src/config.c.o
+src/common/helper.c.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/common/helper.c.o
+.PHONY : src/common/helper.c.o
 
-src/config.i: src/config.c.i
+src/common/helper.i: src/common/helper.c.i
 
-.PHONY : src/config.i
+.PHONY : src/common/helper.i
 
 # target to preprocess a source file
-src/config.c.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/config.c.i
-.PHONY : src/config.c.i
+src/common/helper.c.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/common/helper.c.i
+.PHONY : src/common/helper.c.i
 
-src/config.s: src/config.c.s
+src/common/helper.s: src/common/helper.c.s
 
-.PHONY : src/config.s
+.PHONY : src/common/helper.s
 
 # target to generate assembly for a file
-src/config.c.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/config.c.s
-.PHONY : src/config.c.s
+src/common/helper.c.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TP_Cripto.dir/build.make CMakeFiles/TP_Cripto.dir/src/common/helper.c.s
+.PHONY : src/common/helper.c.s
 
 src/distribution.o: src/distribution.c.o
 
@@ -316,9 +316,9 @@ help:
 	@echo "... src/args_parser.o"
 	@echo "... src/args_parser.i"
 	@echo "... src/args_parser.s"
-	@echo "... src/config.o"
-	@echo "... src/config.i"
-	@echo "... src/config.s"
+	@echo "... src/common/helper.o"
+	@echo "... src/common/helper.i"
+	@echo "... src/common/helper.s"
 	@echo "... src/distribution.o"
 	@echo "... src/distribution.i"
 	@echo "... src/distribution.s"

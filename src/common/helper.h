@@ -9,4 +9,5 @@ char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k);
 char calculateParityBit(char F[8]);
 char * intToBinary(uint8_t num);
 uint8_t binaryToInt(const char * bits);
+uint8_t getValidX_i_j(uint8_t ***shades, int currentShadeIndex, int innerMatrixIndex);
 #endif

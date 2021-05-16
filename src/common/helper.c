@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include "helper.h"
 #include <math.h>
+#include <stdbool.h>
+#include <printf.h>
 
 // https://en.wikipedia.org/wiki/Finite_field_arithmetic#Program_examples
 // operaciones sobre el campo de Galois de G(2^8)
@@ -70,4 +72,33 @@ uint8_t binaryToInt(const char * bits) {
         out += bits[7 - i] == '1' ? (int)pow(2, i) : 0;
     }
     return out;
+}
+
+uint8_t getValidX_i_j(uint8_t ***shades, int totalShades, int innerMatrixIndex) {
+    uint8_t currentX_i_j = shades[totalShades][innerMatrixIndex][0];
+    uint8_t aux_X_i_j_array[totalShades];
+    int aux_X_i_j_array_count = 0;
+    for (int currentShadeIdx = 0; currentShadeIdx < totalShades; ++currentShadeIdx) {
+        uint8_t X_i_j = shades[currentShadeIdx][innerMatrixIndex][0];
+        if (X_i_j > currentX_i_j) {
+            aux_X_i_j_array[aux_X_i_j_array_count] = X_i_j;
+            aux_X_i_j_array_count++;
+        } else if (X_i_j == currentX_i_j) {
+            currentX_i_j = add(currentX_i_j,1);
+            int idx = 0;
+            bool isValid = false;
+            while (!isValid) {
+                uint8_t aux = aux_X_i_j_array[idx];
+                if (aux == currentX_i_j) {
+                    currentX_i_j = add(currentX_i_j,1);
+                    idx = 0;
+                } else {
+                    idx++;
+                }
+                if (idx == totalShades) isValid = true;
+            }
+        }
+    }
+    printf("%d\n",currentX_i_j);
+    return currentX_i_j;
 }
