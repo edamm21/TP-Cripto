@@ -5,7 +5,6 @@
 #include "header_struct.h"
 
 void runDistribution(struct config * config);
-uint8_t *** readShadeFiles(int shadeCount, char * shadeNames[MAX_SHADE_COUNT], char * directory);
 void distributeImage(uint8_t ** blocks, uint8_t *** shades, long blockCount, int shadeCount, long innerMatrixCount, int k);
 void insertIntoLeastSignificantBits(char bit, int index, uint8_t * cell);
 void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header, const uint8_t * headerBytes);
