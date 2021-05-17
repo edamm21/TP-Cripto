@@ -1,7 +1,6 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-
-#define MAX_SHADE_COUNT 20
+#include "common/constants.h"
 
 struct config {
     char type;

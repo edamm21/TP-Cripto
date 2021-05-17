@@ -11,7 +11,7 @@ int main(int argc, char * argv[]) {
     if(config.type == 'd') {
         runDistribution(&config);
     } else {
-        runFinding();
+        runFinding(&config);
     }
     return 0;
 }

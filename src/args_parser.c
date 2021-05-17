@@ -20,7 +20,7 @@ static void version(void) {
 }
 
 static void parseType(char * arg, char * type) {
-    if(strcmp(arg, "d") != 0 && strcmp(arg, "k") != 0) {
+    if(strcmp(arg, "d") != 0 && strcmp(arg, "r") != 0) {
         fprintf(stderr, "First argument should be either d or k. Try h for help");
         exit(1);
     } else {
@@ -73,7 +73,7 @@ static int checkDirectory(struct config * config) {
     return fileCount;
 }
 
-// [d-k] [file] [k] [directory]
+// [d-r] [file] [k] [directory]
 // [h] <- help
 void parseArgs(int argc, char **argv, struct config * config) {
     if(argc == 1) {
@@ -105,6 +105,11 @@ void parseArgs(int argc, char **argv, struct config * config) {
             checkFileExistence(config->imageFile);
         }
         config->shadeCount = checkDirectory(config);
+        if(config->shadeCount < config->k) {
+            fprintf(stderr, "Not enough shades to run process. Check shade directory.\nGiven k: %d, shades provided: %d\n",
+                    config->k, config->shadeCount);
+            exit(1);
+        }
         return;
     } else {
         fprintf(stderr, "Error in arguments passed. Try h for help.\n");
