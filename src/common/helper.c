@@ -108,6 +108,5 @@ uint8_t getValidX_i_j(uint8_t ***shades, int maxShadeIdx, int innerMatrixIndex) 
             }
         }
     }
-    printf("%d\n",currentX_i_j);
     return currentX_i_j;
 }
