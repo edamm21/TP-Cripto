@@ -1,5 +1,6 @@
 #ifndef FINDING_H
 #define FINDING_H
+#include <stdint.h>
 #include "config.h"
 
 void runFinding(struct config * config);

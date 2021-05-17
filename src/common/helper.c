@@ -6,6 +6,7 @@
 #include <config.h>
 #include <string.h>
 #include <header_parser.h>
+#include <header_struct.h>
 
 // https://en.wikipedia.org/wiki/Finite_field_arithmetic#Program_examples
 // operaciones sobre el campo de Galois de G(2^8)
