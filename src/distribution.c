@@ -33,8 +33,9 @@ void runDistribution(struct config *config) {
     for (int i = 0; i < L; i++) {
         int correspondingElementInBlock = i % (bytesCount);
         dividedInBlocks[correspondingBlock][correspondingElementInBlock] = bitmap[i];
-        if (correspondingElementInBlock == (bytesCount - 1)) {
-            dividedInBlocks[++correspondingBlock] = malloc(bytesCount * sizeof(uint8_t));
+        if ((correspondingElementInBlock == (bytesCount - 1)) && (correspondingBlock < blockCount - 1)) {
+            correspondingBlock++;
+            dividedInBlocks[correspondingBlock] = malloc(bytesCount * sizeof(uint8_t));
         }
     }
     const long matrixCount = L / 4;

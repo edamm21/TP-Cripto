@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <common/helper.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include "finding.h"
 
 void runFinding(struct config * config) {
@@ -27,13 +28,17 @@ uint8_t * recoverSecretData(uint8_t *** shades, int shadeCount, long matrixCount
         uint8_t allY_i_js[shadeCount];
         uint8_t allX_i_js[shadeCount];
         int shadeIndex;
-        for(shadeIndex = 0 ; shadeIndex < shadeCount ; shadeIndex++) {
+        for(shadeIndex = 0 ; shadeIndex < 1 ; shadeIndex++) {
             char * W_i_j = intToBinary(shades[shadeIndex][matrixIndex][1]);
             char * V_i_j = intToBinary(shades[shadeIndex][matrixIndex][2]);
             char * U_i_j = intToBinary(shades[shadeIndex][matrixIndex][3]);
-            //TODO: chequear si el bit de paridad es valido, sino descartar la matriz
             char T_i_j[8];
             injectBitsIntoT(T_i_j, W_i_j, V_i_j, U_i_j);
+            bool isParityBitValid = checkParityBit(T_i_j, U_i_j[5]);
+            if(!isParityBitValid) {
+                //HACER TODOS LOS FREE NECESARIOS
+                return -1;
+            }
             allY_i_js[shadeIndex] = binaryToInt(T_i_j);
             allX_i_js[shadeCount] = shades[shadeIndex][matrixIndex][0];
         }

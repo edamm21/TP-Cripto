@@ -1,6 +1,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 #include <stdint.h>
+#include <stdbool.h>
 #include "constants.h"
 
 uint8_t add(uint8_t a, uint8_t b);
@@ -15,5 +16,6 @@ uint8_t *** readShadeFiles(int shadeCount, char * shadeNames[MAX_SHADE_COUNT], c
 uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t * header, long * matrixCount);
 uint8_t *readFile(char *path, long *fileSize);
 void injectBitsIntoT(char T_i_j[8], const char * W_i_j, const char * V_i_j, const char * U_i_j);
+bool checkParityBit(char * T_I_J, char parityBit);
 
 #endif
