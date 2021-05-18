@@ -211,11 +211,29 @@ uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COU
         int numberOfXWYZMatrices = L / 4;
         *matrixCount = numberOfXWYZMatrices;
         shades[i] = malloc(sizeof(uint8_t *) * numberOfXWYZMatrices);
-        for (int blockCount = 0; blockCount < numberOfXWYZMatrices; blockCount++) {
-            int ul = blockCount * 2;
-            int ur = ul + 1;
-            int bl = ul + headerStruct->width;
-            int br = bl + 1;
+        int index = 0;
+        int ul = 0;
+        int ur = ul + 1;
+        int bl = ul + headerStruct->width;
+        int br = bl + 1;
+        shades[i][0] = malloc(sizeof(uint8_t) * 4);
+        shades[i][0][0] = bitmap[ul];
+        shades[i][0][1] = bitmap[ur];
+        shades[i][0][2] = bitmap[bl];
+        shades[i][0][3] = bitmap[br];
+        int blockCount = 0;
+        while(index < L) {
+            blockCount++;
+            index += 2;
+            if (index % headerStruct->width == 0) {
+                index += headerStruct->width;
+            }
+            if (index >= L) break;
+
+            ul = index;
+            ur = ul + 1;
+            bl = ul + headerStruct->width;
+            br = bl + 1;
             shades[i][blockCount] = malloc(sizeof(uint8_t) * 4);
             shades[i][blockCount][0] = bitmap[ul];
             shades[i][blockCount][1] = bitmap[ur];

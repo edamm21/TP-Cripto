@@ -28,7 +28,7 @@ uint8_t * recoverSecretData(uint8_t *** shades, int shadeCount, long matrixCount
         uint8_t allY_i_js[shadeCount];
         uint8_t allX_i_js[shadeCount];
         int shadeIndex;
-        for(shadeIndex = 0 ; shadeIndex < 1 ; shadeIndex++) {
+        for(shadeIndex = 0 ; shadeIndex < shadeCount ; shadeIndex++) {
             char * W_i_j = intToBinary(shades[shadeIndex][matrixIndex][1]);
             char * V_i_j = intToBinary(shades[shadeIndex][matrixIndex][2]);
             char * U_i_j = intToBinary(shades[shadeIndex][matrixIndex][3]);
