@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "helper.h"
+#include "galios.h"
 #include <math.h>
 #include <stdbool.h>
 #include <printf.h>
@@ -13,6 +14,14 @@
 
 uint8_t add(uint8_t a, uint8_t b) {
     return a ^ b;
+}
+
+uint8_t subtract(uint8_t a, uint8_t b) {
+    return add(a,b);
+}
+
+uint8_t divide(uint8_t a, uint8_t b) {
+    return getMultiplication(a, getInverse(b));
 }
 
 uint8_t multiply(uint8_t a, uint8_t b) {

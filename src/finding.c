@@ -15,8 +15,42 @@ void runFinding(struct config * config) {
 }
 
 // TODO: pasar al helper
-uint8_t calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
-    return 1;
+uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k, int r) {
+
+    uint8_t * l = malloc(k * sizeof(uint8_t));
+    memset(l,1,k);
+    uint8_t ** terms = malloc((k-1) * sizeof (uint8_t *));
+    int termsCounter = 0;
+    for (int i = 0; i < k ; i++) {
+        if(i != r) {
+            terms[termsCounter] = malloc(2 * sizeof (uint8_t));
+            uint8_t
+
+
+            terms[termsCounter[]
+
+        }
+    }
+
+
+
+
+
+    //    int lim = (k - r + 1);
+//    uint8_t sum = 0;
+//    for (int i = 0; i < lim ; ++i) {
+//        uint8_t prod = 1;
+//        for (int q = 0; q < lim ; q++) {
+//            if(q != i) {
+//                uint8_t denom = multiply(X[i], X[q]);
+//                uint8_t inverse = inverseMultiply(denom);
+//                uint8_t currentProd = multiply(X[q], inverse);
+//                prod = multiply(prod, currentProd);
+//            }
+//        }
+//        sum = add(sum, prod);
+//    }
+//    // TODO: multiply sum * (-1)^k
 }
 
 uint8_t calculateYPrime(uint8_t s1_j, uint8_t X_i_j, uint8_t Y_i_j) {
@@ -36,14 +70,14 @@ uint8_t * recoverSecretData(uint8_t *** shades, int shadeCount, long matrixCount
             injectBitsIntoT(T_i_j, W_i_j, V_i_j, U_i_j);
             bool isParityBitValid = checkParityBit(T_i_j, U_i_j[5]);
             if(!isParityBitValid) {
-                //HACER TODOS LOS FREE NECESARIOS
+                //TODO HACER TODOS LOS FREE NECESARIOS
                 return -1;
             }
             allY_i_js[shadeIndex] = binaryToInt(T_i_j);
             allX_i_js[shadeCount] = shades[shadeIndex][matrixIndex][0];
         }
         uint8_t * secretValues = malloc(shadeCount * sizeof(uint8_t));
-        secretValues[0] = calculateLagrange(allX_i_js, allY_i_js, shadeCount);
+        secretValues[0] = calculateLagrange(allX_i_js, allY_i_js, shadeCount, 1);
         for(shadeIndex = 0 ; shadeIndex < shadeCount ; shadeIndex++) {
             uint8_t Y_prime_i_j = calculateYPrime(secretValues[0], allX_i_js[shadeIndex], allY_i_js[shadeIndex]);
             // TODO: aca me agarro la duda
