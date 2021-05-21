@@ -14,6 +14,8 @@ add_executable(TP_Cripto
         src/header_parser.c
         src/header_parser.h
         src/common/helper.c
-        src/common/helper.h)
+        src/common/helper.h
+        src/common/galois.c
+        src/common/galois.h)
 
 target_link_libraries(TP_Cripto m)

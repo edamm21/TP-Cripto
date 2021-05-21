@@ -2,67 +2,39 @@
 #include <common/helper.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
+#include <stdio.h>
 #include "finding.h"
 
 void runFinding(struct config * config) {
     uint8_t * headerForCopying;
     long matrixCount;
-    uint8_t *** shades = readShadeFilesFinding(config->shadeCount, config->shadeNames, config->directory, headerForCopying, &matrixCount);
-    uint8_t * recoveredBitmap = recoverSecretData(shades, config->k, matrixCount);
-
+    struct header headerStruct;
+    uint8_t *** shades = readShadeFilesFinding(config->shadeCount, config->shadeNames, config->directory, headerForCopying, &matrixCount, &headerStruct);
+    long L = matrixCount * 4;
+    uint8_t ** recoveredBitmap = recoverSecretData(shades, config->k, matrixCount, L/config->k);
+    createSecretImage(recoveredBitmap, headerForCopying, config, headerStruct, L/config->k);
     // TODO
     //freeShadeMatrix(shades, config->shadeCount, )
 }
 
-// TODO: pasar al helper
-uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k, int r) {
-
-    uint8_t * l = malloc(k * sizeof(uint8_t));
-    memset(l,1,k);
-    uint8_t ** terms = malloc((k-1) * sizeof (uint8_t *));
-    int termsCounter = 0;
-    for (int i = 0; i < k ; i++) {
-        if(i != r) {
-            terms[termsCounter] = malloc(2 * sizeof (uint8_t));
-            uint8_t
-
-
-            terms[termsCounter[]
-
-        }
+void createSecretImage(uint8_t ** blocks, uint8_t * header, struct config * config, struct header headerStruct, long blockCount) {
+    FILE * out = fopen(config->imageFile, "w+b");
+    fwrite(header, sizeof(uint8_t), headerStruct.dataOffset, out);
+    fseek(out, headerStruct.dataOffset, SEEK_SET);
+    for(int blockIndex = 0 ; blockIndex < blockCount ; blockIndex++) {
+        fwrite(blocks[blockIndex], sizeof(uint8_t), config->k, out);
+        fseek(out, headerStruct.dataOffset + (blockIndex * config->k), SEEK_SET);
     }
-
-
-
-
-
-    //    int lim = (k - r + 1);
-//    uint8_t sum = 0;
-//    for (int i = 0; i < lim ; ++i) {
-//        uint8_t prod = 1;
-//        for (int q = 0; q < lim ; q++) {
-//            if(q != i) {
-//                uint8_t denom = multiply(X[i], X[q]);
-//                uint8_t inverse = inverseMultiply(denom);
-//                uint8_t currentProd = multiply(X[q], inverse);
-//                prod = multiply(prod, currentProd);
-//            }
-//        }
-//        sum = add(sum, prod);
-//    }
-//    // TODO: multiply sum * (-1)^k
 }
 
-uint8_t calculateYPrime(uint8_t s1_j, uint8_t X_i_j, uint8_t Y_i_j) {
-    return 1;
-}
-
-uint8_t * recoverSecretData(uint8_t *** shades, int shadeCount, long matrixCount) {
+uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long blockCount) {
+    uint8_t ** recoveredBlocks = malloc(blockCount * sizeof(uint8_t *));
     for(int matrixIndex = 0 ; matrixIndex < matrixCount ; matrixIndex++) {
-        uint8_t allY_i_js[shadeCount];
-        uint8_t allX_i_js[shadeCount];
+        uint8_t allY_i_js[k];
+        uint8_t allX_i_js[k];
         int shadeIndex;
-        for(shadeIndex = 0 ; shadeIndex < shadeCount ; shadeIndex++) {
+        for(shadeIndex = 0 ; shadeIndex < k ; shadeIndex++) {
             char * W_i_j = intToBinary(shades[shadeIndex][matrixIndex][1]);
             char * V_i_j = intToBinary(shades[shadeIndex][matrixIndex][2]);
             char * U_i_j = intToBinary(shades[shadeIndex][matrixIndex][3]);
@@ -71,17 +43,19 @@ uint8_t * recoverSecretData(uint8_t *** shades, int shadeCount, long matrixCount
             bool isParityBitValid = checkParityBit(T_i_j, U_i_j[5]);
             if(!isParityBitValid) {
                 //TODO HACER TODOS LOS FREE NECESARIOS
-                return -1;
+                free(W_i_j);
+                free(V_i_j);
+                free(U_i_j);
+                return NULL;
             }
             allY_i_js[shadeIndex] = binaryToInt(T_i_j);
-            allX_i_js[shadeCount] = shades[shadeIndex][matrixIndex][0];
+            allX_i_js[shadeIndex] = shades[shadeIndex][matrixIndex][0];
+            free(W_i_j);
+            free(V_i_j);
+            free(U_i_j);
         }
-        uint8_t * secretValues = malloc(shadeCount * sizeof(uint8_t));
-        secretValues[0] = calculateLagrange(allX_i_js, allY_i_js, shadeCount, 1);
-        for(shadeIndex = 0 ; shadeIndex < shadeCount ; shadeIndex++) {
-            uint8_t Y_prime_i_j = calculateYPrime(secretValues[0], allX_i_js[shadeIndex], allY_i_js[shadeIndex]);
-            // TODO: aca me agarro la duda
-            //secretValues[1 + shadeIndex] = calculateLagrange(allX_i_js,  , shadeCount);
-        }
+        recoveredBlocks[matrixIndex] = malloc(k * sizeof(uint8_t));
+        memcpy(recoveredBlocks[matrixIndex], calculateLagrange(allX_i_js, allY_i_js, k), k * sizeof(uint8_t));
     }
+    return recoveredBlocks;
 }

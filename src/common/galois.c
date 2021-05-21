@@ -1,6 +1,6 @@
 #include <stdint.h>
-#include <helper.h>
-#include "galios.h"
+#include "helper.h"
+#include "galois.h"
 
 
 uint8_t matrix[255][255];

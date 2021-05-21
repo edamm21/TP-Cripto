@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include "helper.h"
-#include "galios.h"
+#include "galois.h"
 #include <math.h>
 #include <stdbool.h>
 #include <printf.h>
@@ -8,6 +8,7 @@
 #include <string.h>
 #include <header_parser.h>
 #include <header_struct.h>
+#include <stdio.h>
 
 // https://en.wikipedia.org/wiki/Finite_field_arithmetic#Program_examples
 // operaciones sobre el campo de Galois de G(2^8)
@@ -195,7 +196,7 @@ uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], ch
     return shades;
 }
 
-uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t * header, long * matrixCount) {
+uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t * header, long * matrixCount, struct header * headerStructParam) {
     uint8_t ***shades = malloc(shadeCount * sizeof(uint8_t **));
     for (int i = 0; i < shadeCount; i++) {
         long fileSize;
@@ -214,6 +215,7 @@ uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COU
         if(i == 0) {
             header = malloc(headerStruct->dataOffset * sizeof(uint8_t));
             memcpy(header, fileData, headerStruct->dataOffset);
+            memcpy(headerStructParam, headerStruct, sizeof(struct header));
         }
         long L = fileSize - headerStruct->dataOffset;
         uint8_t *bitmap = fileData + headerStruct->dataOffset;
@@ -269,4 +271,36 @@ void injectBitsIntoT(char T_i_j[8], const char * W_i_j, const char * V_i_j, cons
 
 bool checkParityBit(char * T_I_J, char parityBit) {
     return calculateParityBit(T_I_J) == parityBit;
+}
+
+uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
+    uint8_t * polynomial = malloc(k * sizeof(uint8_t));
+    memset(polynomial,1,k);
+    uint8_t ** terms = malloc((k-1) * sizeof (uint8_t *));
+    int termsCounter;
+    uint8_t res;
+    for (int i = 0; i < k ; i++) {
+        termsCounter = 0;
+        res = 1;
+        for(int j = 0 ; j < k ; j++) {
+            if (i != j) {
+                res = getMultiplication(res, add(X[i], X[j]));
+            }
+            if(termsCounter == 0) {
+                polynomial[0] = getMultiplication(X[j], Y[i]);
+                polynomial[1] = Y[i];
+            } else {
+                // desplazo los terminos porque ahora va incrementando el grado hasta llegar a k
+                for(int currentMaxGrade = termsCounter ; currentMaxGrade >= 0 ; currentMaxGrade--) {
+                    polynomial[currentMaxGrade + 1] = polynomial[currentMaxGrade];
+                }
+                polynomial[0] = getMultiplication(polynomial[0], X[j]);
+                for(int currentTerm = 1 ; currentTerm <= termsCounter ; currentTerm++) {
+                    polynomial[currentTerm] = add(polynomial[currentTerm], getMultiplication(polynomial[currentTerm + 1], X[j]));
+                }
+            }
+            termsCounter++;
+        }
+    }
+    return polynomial;
 }
