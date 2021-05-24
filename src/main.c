@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include <string.h>
 #include <common/galois.h>
 #include "args_parser.h"

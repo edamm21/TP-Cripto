@@ -4,13 +4,14 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <common/galois.h>
 #include "finding.h"
 
 void runFinding(struct config * config) {
-    uint8_t * headerForCopying;
+    uint8_t * headerForCopying = NULL;
     long matrixCount;
     struct header headerStruct;
-    uint8_t *** shades = readShadeFilesFinding(config->shadeCount, config->shadeNames, config->directory, headerForCopying, &matrixCount, &headerStruct);
+    uint8_t *** shades = readShadeFilesFinding(config->shadeCount, config->shadeNames, config->directory, &headerForCopying, &matrixCount, &headerStruct);
     long L = matrixCount * 4;
     uint8_t ** recoveredBitmap = recoverSecretData(shades, config->k, matrixCount, L/config->k);
     createSecretImage(recoveredBitmap, headerForCopying, config, headerStruct, L/config->k);
@@ -24,8 +25,10 @@ void createSecretImage(uint8_t ** blocks, uint8_t * header, struct config * conf
     fseek(out, headerStruct.dataOffset, SEEK_SET);
     for(int blockIndex = 0 ; blockIndex < blockCount ; blockIndex++) {
         fwrite(blocks[blockIndex], sizeof(uint8_t), config->k, out);
-        fseek(out, headerStruct.dataOffset + (blockIndex * config->k), SEEK_SET);
+        printBlock(blocks[blockIndex], config->k);
+        fseek(out, headerStruct.dataOffset + ((blockIndex + 1) * config->k), SEEK_SET);
     }
+    fclose(out);
 }
 
 uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long blockCount) {
@@ -50,6 +53,7 @@ uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long b
             }
             allY_i_js[shadeIndex] = binaryToInt(T_i_j);
             allX_i_js[shadeIndex] = shades[shadeIndex][matrixIndex][0];
+            printf("shade[%d][%d]: F(%d) = %d\n", shadeIndex, matrixIndex, shades[shadeIndex][matrixIndex][0], binaryToInt(T_i_j));
             free(W_i_j);
             free(V_i_j);
             free(U_i_j);
@@ -59,3 +63,4 @@ uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long b
     }
     return recoveredBlocks;
 }
+

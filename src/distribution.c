@@ -3,6 +3,7 @@
 #include <string.h>
 #include <common/helper.h>
 #include <stdbool.h>
+#include <math.h>
 #include "distribution.h"
 #include "config.h"
 #include "header_parser.h"
@@ -28,20 +29,16 @@ void runDistribution(struct config *config) {
     long blockCount = L / bytesCount; // L / k
     //uint8_t dividedInBlocks[blockCount][bytesCount];
     uint8_t **dividedInBlocks = malloc(blockCount * sizeof(uint8_t *));
-    dividedInBlocks[0] = malloc(bytesCount * sizeof(uint8_t));
-    int correspondingBlock = 0;
-    for (int i = 0; i < L; i++) {
-        int correspondingElementInBlock = i % (bytesCount);
-        dividedInBlocks[correspondingBlock][correspondingElementInBlock] = bitmap[i];
-        if ((correspondingElementInBlock == (bytesCount - 1)) && (correspondingBlock < blockCount - 1)) {
-            correspondingBlock++;
-            dividedInBlocks[correspondingBlock] = malloc(bytesCount * sizeof(uint8_t));
+    for(int i = 0 ; i < blockCount ; i++) {
+        dividedInBlocks[i] = calloc(config->k, sizeof(uint8_t)); // relleno con 0s
+        for(int j = 0 ; j < config->k ; j++) {
+            dividedInBlocks[i][j] = bitmap[i * config->k + j];
         }
     }
     const long matrixCount = L / 4;
     uint8_t ***shades = readShadeFiles(config->shadeCount, config->shadeNames, config->directory);
     distributeImage(dividedInBlocks, shades, blockCount, config->shadeCount, matrixCount, config->k);
-    writeOutputFile(shades, config, headerStruct, fileData);
+    writeOutputFile(shades, config, headerStruct, fileData, (int)L);
     // Para no olvidarnos
     free(headerStruct);
     freeShadeMatrix(shades, config->shadeCount, matrixCount);
@@ -76,16 +73,47 @@ void insertIntoLeastSignificantBits(char bit, int index, uint8_t *cell) {
     free(bits);
 }
 
-void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header, const uint8_t * headerBytes) {
+void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header, const uint8_t * headerBytes, int L) {
     for(int i = 0 ; i < config->shadeCount ; i++) {
         char * testDir = malloc(strlen("test-images-out/") + strlen(config->shadeNames[i]) + 1);
         strcpy(testDir, "test-images-out/");
         strcat(testDir, config->shadeNames[i]);
         FILE * f = fopen(testDir, "w+b");
         fwrite(headerBytes, sizeof(uint8_t), header->dataOffset, f);
-        int cantidadDePasadas = (int)(header->width / 2);
-        int totalElements = header->width * header->height;
-        int elementsInserted = 0;
+        int widthLimit = (int)(sqrt(L));
+        /*
+         *  0  1  2   3
+         *  4  5  6   7
+         *  8  9  10 11
+         *  12 13 14 15
+         *
+         *  s - 0 1 4 5
+         *    - 2 3 6 7
+         *    - 8 9 12 13
+         *    - 10 11 14 15
+         */
+        /*
+         * s[0][0] -> o[0][0]
+         * s[0][1] -> o[0][1]
+         * s[0][2] -> o[1][0]
+         * s[0][3] -> o[1][1]
+         *
+         * s[1][0] -> o[0][2]
+         * s[1][1] -> o[0][3]
+         * s[1][2] -> o[1][2]
+         * s[1][3] -> o[1][3]
+         *
+         * s[2][0] -> o[2][0]
+         * s[2][1] -> o[2][1]
+         * s[2][2] -> o[3][0]
+         * s[2][3] -> o[3][1]
+         *
+         * s[3][0] -> o[2][2]
+         * s[3][1] -> o[2][3]
+         * s[3][2] -> o[3][2]
+         * s[3][3] -> o[3][3]
+         */
+        /*int elementsInserted = 0;
         int pasadaActual = 0;
         while(elementsInserted < totalElements) {
             bool primerMitad = true;
@@ -111,7 +139,33 @@ void writeOutputFile(uint8_t *** shades, struct config * config, struct header *
                 }
             }
             pasadaActual++;
+        }*/
+        int index = 0;
+        int blockCounter = 0;
+        uint8_t * bitmap = malloc(L * sizeof(uint8_t));
+        int elementsInserted = 0;
+        while(elementsInserted < L) {
+            if (index % widthLimit == 0 && index != 0) {
+                index += widthLimit;
+            }
+            if (index >= L) break;
+
+            int ul = index;
+            int ur = ul + 1;
+            int bl = ul + widthLimit;
+            int br = bl + 1;
+            bitmap[ul] = shades[i][blockCounter][0];
+            bitmap[ur] = shades[i][blockCounter][1];
+            bitmap[bl] = shades[i][blockCounter][2];
+            bitmap[br] = shades[i][blockCounter][3];
+            index += 2;
+            blockCounter++;
+            elementsInserted += 4;
         }
+        printf("shade: %d\n", i);
+        printBlock(bitmap, L);
+        fwrite(bitmap, sizeof(uint8_t), L, f);
+        free(bitmap);
         fclose(f);
     }
 }

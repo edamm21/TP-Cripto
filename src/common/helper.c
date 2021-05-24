@@ -196,7 +196,7 @@ uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], ch
     return shades;
 }
 
-uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t * header, long * matrixCount, struct header * headerStructParam) {
+uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t ** header, long * matrixCount, struct header * headerStructParam) {
     uint8_t ***shades = malloc(shadeCount * sizeof(uint8_t **));
     for (int i = 0; i < shadeCount; i++) {
         long fileSize;
@@ -213,8 +213,8 @@ uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COU
             return NULL;
         }
         if(i == 0) {
-            header = malloc(headerStruct->dataOffset * sizeof(uint8_t));
-            memcpy(header, fileData, headerStruct->dataOffset);
+            *header = malloc(headerStruct->dataOffset * sizeof(uint8_t));
+            memcpy(*header, fileData, headerStruct->dataOffset);
             memcpy(headerStructParam, headerStruct, sizeof(struct header));
         }
         long L = fileSize - headerStruct->dataOffset;
@@ -273,34 +273,56 @@ bool checkParityBit(char * T_I_J, char parityBit) {
     return calculateParityBit(T_I_J) == parityBit;
 }
 
+void printBlock(uint8_t * block, int k) {
+    for(int i = 0 ; i < k ; i++) {
+        printf("%x - ", block[i]);
+    }
+    printf("\n");
+}
+
+
 uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
     uint8_t * polynomial = malloc(k * sizeof(uint8_t));
-    memset(polynomial,1,k);
-    uint8_t ** terms = malloc((k-1) * sizeof (uint8_t *));
+    memset(polynomial,0,k);
     int termsCounter;
     uint8_t res;
     for (int i = 0; i < k ; i++) {
         termsCounter = 0;
         res = 1;
+        uint8_t aux[k];
+        for(int t = 0 ; t < k ; t++) {
+            aux[t] = 0;
+        }
         for(int j = 0 ; j < k ; j++) {
             if (i != j) {
+                printf("res before: %d\n", res);
                 res = getMultiplication(res, add(X[i], X[j]));
-            }
-            if(termsCounter == 0) {
-                polynomial[0] = getMultiplication(X[j], Y[i]);
-                polynomial[1] = Y[i];
-            } else {
-                // desplazo los terminos porque ahora va incrementando el grado hasta llegar a k
-                for(int currentMaxGrade = termsCounter ; currentMaxGrade >= 0 ; currentMaxGrade--) {
-                    polynomial[currentMaxGrade + 1] = polynomial[currentMaxGrade];
+                printf("Xi: %d, Xj: %d, res * (Xi + Xj): %d\n", X[i], X[j], res);
+                if (termsCounter == 0) {
+                    aux[0] = getMultiplication(X[j], Y[i]);
+                    aux[1] = Y[i];
+                    printBlock(aux, k);
+                } else {
+                    // desplazo los terminos porque ahora va incrementando el grado hasta llegar a k
+                    for (int currentMaxGrade = termsCounter; currentMaxGrade >= 0; currentMaxGrade--) {
+                        aux[currentMaxGrade + 1] = aux[currentMaxGrade];
+                    }
+                    aux[0] = getMultiplication(aux[0], X[j]);
+                    for (int currentTerm = 1; currentTerm <= termsCounter; currentTerm++) {
+                        aux[currentTerm] = add(aux[currentTerm],getMultiplication(aux[currentTerm + 1], X[j]));
+                    }
+                    printf("termCounter: %d\n", termsCounter);
+                    printBlock(aux, k);
                 }
-                polynomial[0] = getMultiplication(polynomial[0], X[j]);
-                for(int currentTerm = 1 ; currentTerm <= termsCounter ; currentTerm++) {
-                    polynomial[currentTerm] = add(polynomial[currentTerm], getMultiplication(polynomial[currentTerm + 1], X[j]));
-                }
+                termsCounter++;
             }
-            termsCounter++;
         }
+        for(int r = 0 ; r < k ; r++) {
+            uint8_t inverse = getInverse(res);
+            polynomial[r] = add(polynomial[r], getMultiplication(aux[r], getInverse(res)));
+        }
+        printf("polynomial\n");
+        printBlock(polynomial, k);
     }
     return polynomial;
 }
