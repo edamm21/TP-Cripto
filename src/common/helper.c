@@ -74,10 +74,12 @@ char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k) {
 
 char calculateParityBit(char F[8]) {
     char pByte = F[0];
+    int accum = 0;
     for(int i = 1 ; i < 8 ; i++) {
+        accum += F[i] == '1' ? 1 : 0;
         pByte = pByte == F[i] ? '0' : '1';
     }
-    return pByte;
+    return accum % 2 == 0 ? '1' : '0';
 }
 
 uint8_t binaryToInt(const char * bits) {
@@ -140,7 +142,7 @@ uint8_t *readFile(char *path, long *fileSize) {
     return fileData;
 }
 
-uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory) {
+uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, int k) {
     uint8_t ***shades = malloc(shadeCount * sizeof(uint8_t **));
     for (int i = 0; i < shadeCount; i++) {
         long fileSize;
@@ -158,36 +160,19 @@ uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], ch
         }
         long L = fileSize - headerStruct->dataOffset;
         uint8_t *bitmap = fileData + headerStruct->dataOffset;
-        int numberOfXWYZMatrices = L / 4;
-        shades[i] = malloc(sizeof(uint8_t *) * numberOfXWYZMatrices);
-        int index = 0;
-        int ul = 0;
-        int ur = ul + 1;
-        int bl = ul + headerStruct->width;
-        int br = bl + 1;
-        shades[i][0] = malloc(sizeof(uint8_t) * 4);
-        shades[i][0][0] = bitmap[ul];
-        shades[i][0][1] = bitmap[ur];
-        shades[i][0][2] = bitmap[bl];
-        shades[i][0][3] = bitmap[br];
-        int blockCount = 0;
-        while(index < L) {
-            blockCount++;
-            index += 2;
-            if (index % headerStruct->width == 0) {
-                index += headerStruct->width;
-            }
-            if (index >= L) break;
-
-            ul = index;
-            ur = ul + 1;
-            bl = ul + headerStruct->width;
-            br = bl + 1;
-            shades[i][blockCount] = malloc(sizeof(uint8_t) * 4);
-            shades[i][blockCount][0] = bitmap[ul];
-            shades[i][blockCount][1] = bitmap[ur];
-            shades[i][blockCount][2] = bitmap[bl];
-            shades[i][blockCount][3] = bitmap[br];
+        int blockCount = L / k;
+        shades[i] = malloc(sizeof(uint8_t *) * blockCount);
+        int blocksAssigned = 0;
+        while(blocksAssigned < blockCount) {
+            int blockRow = 2 * blocksAssigned % headerStruct->width;
+            int blockCol = 2 * (2 * blocksAssigned / headerStruct->width);
+            int blockPosition = (headerStruct->height - 1) * headerStruct->width + blockRow - blockCol * headerStruct->width;
+            shades[i][blocksAssigned] = malloc(4 * sizeof(uint8_t));
+            shades[i][blocksAssigned][0] = bitmap[blockPosition];
+            shades[i][blocksAssigned][1] = bitmap[blockPosition + 1];
+            shades[i][blocksAssigned][2] = bitmap[blockPosition - headerStruct->width];
+            shades[i][blocksAssigned][3] = bitmap[blockPosition - headerStruct->width + 1];
+            blocksAssigned++;
         }
         free(completePath);
         free(fileData);
@@ -196,7 +181,7 @@ uint8_t *** readShadeFiles(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], ch
     return shades;
 }
 
-uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t ** header, long * matrixCount, struct header * headerStructParam) {
+uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COUNT], char *directory, uint8_t ** header, long * matrixCount, struct header * headerStructParam, int k) {
     uint8_t ***shades = malloc(shadeCount * sizeof(uint8_t **));
     for (int i = 0; i < shadeCount; i++) {
         long fileSize;
@@ -219,37 +204,20 @@ uint8_t *** readShadeFilesFinding(int shadeCount, char *shadeNames[MAX_SHADE_COU
         }
         long L = fileSize - headerStruct->dataOffset;
         uint8_t *bitmap = fileData + headerStruct->dataOffset;
-        int numberOfXWYZMatrices = L / 4;
-        *matrixCount = numberOfXWYZMatrices;
-        shades[i] = malloc(sizeof(uint8_t *) * numberOfXWYZMatrices);
-        int index = 0;
-        int ul = 0;
-        int ur = ul + 1;
-        int bl = ul + headerStruct->width;
-        int br = bl + 1;
-        shades[i][0] = malloc(sizeof(uint8_t) * 4);
-        shades[i][0][0] = bitmap[ul];
-        shades[i][0][1] = bitmap[ur];
-        shades[i][0][2] = bitmap[bl];
-        shades[i][0][3] = bitmap[br];
-        int blockCount = 0;
-        while(index < L) {
-            blockCount++;
-            index += 2;
-            if (index % headerStruct->width == 0) {
-                index += headerStruct->width;
-            }
-            if (index >= L) break;
-
-            ul = index;
-            ur = ul + 1;
-            bl = ul + headerStruct->width;
-            br = bl + 1;
-            shades[i][blockCount] = malloc(sizeof(uint8_t) * 4);
-            shades[i][blockCount][0] = bitmap[ul];
-            shades[i][blockCount][1] = bitmap[ur];
-            shades[i][blockCount][2] = bitmap[bl];
-            shades[i][blockCount][3] = bitmap[br];
+        long blockCount = L / k;
+        *matrixCount = blockCount;
+        shades[i] = malloc(sizeof(uint8_t *) * blockCount);
+        int blocksAssigned = 0;
+        while(blocksAssigned < blockCount) {
+            int blockRow = 2 * blocksAssigned % headerStruct->width;
+            int blockCol = 2 * (2 * blocksAssigned / headerStruct->width);
+            int blockPosition = (headerStruct->height - 1) * headerStruct->width + blockRow - blockCol * headerStruct->width;
+            shades[i][blocksAssigned] = malloc(4 * sizeof(uint8_t));
+            shades[i][blocksAssigned][0] = bitmap[blockPosition];
+            shades[i][blocksAssigned][1] = bitmap[blockPosition + 1];
+            shades[i][blocksAssigned][2] = bitmap[blockPosition - headerStruct->width];
+            shades[i][blocksAssigned][3] = bitmap[blockPosition - headerStruct->width + 1];
+            blocksAssigned++;
         }
         free(completePath);
         free(fileData);
@@ -295,9 +263,7 @@ uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
         }
         for(int j = 0 ; j < k ; j++) {
             if (i != j) {
-                printf("res before: %d\n", res);
                 res = getMultiplication(res, add(X[i], X[j]));
-                printf("Xi: %d, Xj: %d, res * (Xi + Xj): %d\n", X[i], X[j], res);
                 if (termsCounter == 0) {
                     aux[0] = getMultiplication(X[j], Y[i]);
                     aux[1] = Y[i];
@@ -311,18 +277,13 @@ uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
                     for (int currentTerm = 1; currentTerm <= termsCounter; currentTerm++) {
                         aux[currentTerm] = add(aux[currentTerm],getMultiplication(aux[currentTerm + 1], X[j]));
                     }
-                    printf("termCounter: %d\n", termsCounter);
-                    printBlock(aux, k);
                 }
                 termsCounter++;
             }
         }
         for(int r = 0 ; r < k ; r++) {
-            uint8_t inverse = getInverse(res);
             polynomial[r] = add(polynomial[r], getMultiplication(aux[r], getInverse(res)));
         }
-        printf("polynomial\n");
-        printBlock(polynomial, k);
     }
     return polynomial;
 }

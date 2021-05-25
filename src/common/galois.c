@@ -15,9 +15,6 @@ void populateMatrix() {
         for (int j = 0; j < 256 ; ++j) {
             matrix[i][j] = multiply(i,j);
             if (matrix[i][j] == 1) {
-                if(i == 2 || j == 2) {
-                    printf("inverse: %x(%d) -> %x(%d)\n", i, i, j, j);
-                }
                 inverseValue[i] = j;
             }
         }
