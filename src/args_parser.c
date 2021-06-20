@@ -56,6 +56,14 @@ static void parseString(char * src, char * dest) {
     strcpy(dest, src);
 }
 
+static void parseDirectory(char * src, char * dest) {
+    size_t len = strlen(src);
+    if(src[len-1] != '/') {
+        strcat(src, "/");
+    }
+    strcpy(dest, src);
+}
+
 static void parseK(char * arg, int * type) {
     int k = atoi(arg);
     if(k < 4 || k > 6) {
@@ -121,7 +129,7 @@ void parseArgs(int argc, char **argv, struct config * config) {
                     parseK(argv[i + 1], &config->k);
                     break;
                 case 3:
-                    parseString(argv[i + 1], config->directory);
+                    parseDirectory(argv[i + 1], config-> directory);
                     break;
                 default:
                     break;
