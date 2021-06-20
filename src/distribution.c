@@ -10,6 +10,7 @@
 #include "header_struct.h"
 
 void runDistribution(struct config *config) {
+    printf("Distributing image...\n");
     long fileSize;
     uint8_t *fileData = readFile(config->imageFile, &fileSize);
     if (fileData == NULL)
@@ -17,6 +18,7 @@ void runDistribution(struct config *config) {
     struct header *headerStruct = parseHeader(fileData);
     if (headerStruct == NULL) {
         free(fileData);
+        freeConfig(config);
         fprintf(stderr, "Error creating header structure from BMP image!");
         return;
     }
@@ -40,6 +42,9 @@ void runDistribution(struct config *config) {
     // Para no olvidarnos
     free(headerStruct);
     freeShadeMatrix(shades, config->shadeCount, matrixCount);
+    freeRecoveredBlocks(dividedInBlocks, blockCount);
+    freeConfig(config);
+    free(fileData);
 }
 
 void distributeImage(uint8_t **blocks, uint8_t ***shades, long blockCount, int shadeCount, long innerMatrixCount, int k) {
@@ -72,8 +77,8 @@ void insertIntoLeastSignificantBits(char bit, int index, uint8_t *cell) {
 
 void writeOutputFile(uint8_t *** shades, struct config * config, struct header * header, const uint8_t * headerBytes, int L) {
     for(int i = 0 ; i < config->shadeCount ; i++) {
-        char * testDir = malloc(strlen("test-images-out/") + strlen(config->shadeNames[i]) + 1);
-        strcpy(testDir, "test-images-out/");
+        char * testDir = malloc(strlen(config->directory) + strlen(config->shadeNames[i]) + 1);
+        strcpy(testDir, config->directory);
         strcat(testDir, config->shadeNames[i]);
         FILE * f = fopen(testDir, "w+b");
         fwrite(headerBytes, sizeof(uint8_t), header->dataOffset, f);
@@ -93,10 +98,9 @@ void writeOutputFile(uint8_t *** shades, struct config * config, struct header *
             blockCounter++;
             elementsInserted += 4;
         }
-        printf("shade: %d\n", i);
-        printBlock(bitmap, L);
         fwrite(bitmap, sizeof(uint8_t), L, f);
         free(bitmap);
+        free(testDir);
         fclose(f);
     }
 }
