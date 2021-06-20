@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include "constants.h"
 #include "header_struct.h"
+#include "config.h"
 
 uint8_t add(uint8_t a, uint8_t b);
 uint8_t multiply(uint8_t a, uint8_t b);
@@ -20,5 +21,8 @@ void injectBitsIntoT(char T_i_j[8], const char * W_i_j, const char * V_i_j, cons
 bool checkParityBit(char * T_I_J, char parityBit);
 uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k);
 void printBlock(uint8_t * block, int k);
+void freeConfig(struct config * config);
+void freeRecoveredBlocks(uint8_t ** blocks, long blockCount);
+void freeShades(uint8_t *** shades, int shadeCount, long blockCount);
 
 #endif

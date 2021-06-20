@@ -73,13 +73,17 @@ char * evaluatePolynomial(uint8_t * block, uint8_t X_i_j, int k) {
 }
 
 char calculateParityBit(char F[8]) {
-    char pByte = F[0];
-    int accum = 0;
-    for(int i = 1 ; i < 8 ; i++) {
-        accum += F[i] == '1' ? 1 : 0;
-        pByte = pByte == F[i] ? '0' : '1';
+    char currentCompared;
+    for(int i = 0 ; i < 8 ;) {
+        if(i == 0) {
+            currentCompared = F[i] == F[i+1] ? '0' : '1';
+            i += 2;
+        } else {
+            currentCompared = currentCompared == F[i] ? '0' : '1';
+            i++;
+        }
     }
-    return accum % 2 == 0 ? '1' : '0';
+    return currentCompared;
 }
 
 uint8_t binaryToInt(const char * bits) {
@@ -267,7 +271,6 @@ uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
                 if (termsCounter == 0) {
                     aux[0] = getMultiplication(X[j], Y[i]);
                     aux[1] = Y[i];
-                    printBlock(aux, k);
                 } else {
                     // desplazo los terminos porque ahora va incrementando el grado hasta llegar a k
                     for (int currentMaxGrade = termsCounter; currentMaxGrade >= 0; currentMaxGrade--) {
@@ -286,4 +289,28 @@ uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
         }
     }
     return polynomial;
+}
+
+void freeConfig(struct config * config) {
+    for(int i = 0 ; i < config->shadeCount ; i++) {
+        free(config->shadeNames[i]);
+    }
+}
+
+void freeRecoveredBlocks(uint8_t ** blocks, long blockCount) {
+    for(int i = 0 ; i < blockCount ; i++) {
+        if(blocks[i] != NULL)
+            free(blocks[i]);
+    }
+    free(blocks);
+}
+
+void freeShades(uint8_t *** shades, int shadeCount, long blockCount) {
+    for(int i = 0 ; i < shadeCount ; i++) {
+        for(int j = 0 ; j < blockCount ; j++) {
+            free(shades[i][j]);
+        }
+        free(shades[i]);
+    }
+    free(shades);
 }

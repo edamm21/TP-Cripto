@@ -6,13 +6,25 @@
 #include "finding.h"
 
 void runFinding(struct config * config) {
+    printf("Finding hidden image...\n");
     uint8_t * headerForCopying = NULL;
     long matrixCount;
     struct header headerStruct;
     uint8_t *** shades = readShadeFilesFinding(config->shadeCount, config->shadeNames, config->directory, &headerForCopying, &matrixCount, &headerStruct, config->k);
     long L = headerStruct.fileSize - headerStruct.dataOffset;
     uint8_t ** recoveredBitmap = recoverSecretData(shades, config->k, matrixCount, L/config->k);
+    if(recoveredBitmap == NULL) {
+        fprintf(stderr, "Error recovering hidden image!\n");
+        free(headerForCopying);
+        freeShades(shades, config->shadeCount, matrixCount);
+        freeConfig(config);
+        return;
+    }
     createSecretImage(recoveredBitmap, headerForCopying, config, headerStruct, L/config->k);
+    free(headerForCopying);
+    freeShades(shades, config->shadeCount, matrixCount);
+    freeConfig(config);
+    freeRecoveredBlocks(recoveredBitmap, matrixCount);
     // TODO
     //freeShadeMatrix(shades, config->shadeCount, )
 }
@@ -40,14 +52,15 @@ uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long b
             char * U_i_j = intToBinary(shades[shadeIndex][matrixIndex][3]);
             char T_i_j[8];
             injectBitsIntoT(T_i_j, W_i_j, V_i_j, U_i_j);
-            //bool isParityBitValid = checkParityBit(T_i_j, U_i_j[5]);
-            //if(!isParityBitValid) {
-            //    //TODO HACER TODOS LOS FREE NECESARIOS
-            //    free(W_i_j);
-            //    free(V_i_j);
-            //    free(U_i_j);
-            //    return NULL;
-            //}
+            bool isParityBitValid = checkParityBit(T_i_j, U_i_j[5]);
+            if(!isParityBitValid) {
+                //TODO HACER TODOS LOS FREE NECESARIOS
+                free(W_i_j);
+                free(V_i_j);
+                free(U_i_j);
+                freeRecoveredBlocks(recoveredBlocks, blockCount);
+                return NULL;
+            }
             allY_i_js[shadeIndex] = binaryToInt(T_i_j);
             allX_i_js[shadeIndex] = shades[shadeIndex][matrixIndex][0];
             free(W_i_j);
@@ -55,7 +68,9 @@ uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long b
             free(U_i_j);
         }
         recoveredBlocks[matrixIndex] = malloc(k * sizeof(uint8_t));
-        memcpy(recoveredBlocks[matrixIndex], calculateLagrange(allX_i_js, allY_i_js, k), k * sizeof(uint8_t));
+        uint8_t * toCopy = calculateLagrange(allX_i_js, allY_i_js, k);
+        memcpy(recoveredBlocks[matrixIndex], toCopy, k * sizeof(uint8_t));
+        free(toCopy);
     }
     return recoveredBlocks;
 }

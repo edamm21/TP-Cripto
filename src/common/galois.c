@@ -19,7 +19,6 @@ void populateMatrix() {
             }
         }
     }
-    printBlock(inverseValue, 5);
 }
 
 uint8_t getMultiplication(uint8_t a, uint8_t b) {
