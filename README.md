@@ -5,7 +5,7 @@ Se puede instalar siguiendo los simples pasos que se encuentran en https://cgold
 
 
 ####Una vez que contemos con CMAKE instalado y sobre el directorio del trabajo practico ejecutamos:
-1) cmake CMakeList.txt
+1) cmake CMakeLists.txt
 2) make
 
 ###Para distribuir una imagen secreta en otras imágenes:
