@@ -1,16 +1,38 @@
-#include "args_parser.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <errno.h>
-#include <unistd.h>
 #include "config.h"
+#include "args_parser.h"
+#include "custom_print.h"
 
-static void usage() {
-    fprintf(stderr,
-            "Usage: [OPTION]...\n"
-            "\n");
+
+
+static void help() {
+    printlgu("\nDistribution mode mandatory parameters:\n");
+    printlnb("d: ");
+    printlnu("Indicates that distribution mode will be used.\n");
+    printlnb("file.bmp: ");
+    printlnu("File name with '.bmp' extension. It is the image to distribute.\n");
+    printlnb("k: ");
+    printlnu("Integer number between 4 and 6. Represents the minimum amount of shadows needed to retrieve the secret in a (k, n) scheme. \n");
+    printlnb("directory: ");
+    printlnu("Directory with the images used to distribute the secret. Must contain images with a '.bmp' extension, 8 bits per pixel and equal in size to the secret image.\n");
+    printlnb("\nExample:\n");
+    printlcn("./TP_Cripto d imageToHide.bmp 4 images/\n");
+
+    printlgu("\nRecovery mode mandatory parameters:\n");
+    printlnb("r: ");
+    printlnu("Indicates that the recovery mode will be used.\n");
+    printlnb("file.bmp: ");
+    printlnu("File name with '.bmp' extension. Will contain the secret image revealed at the end of the program execution.\n");
+    printlnb("k: ");
+    printlnu("Integer number between 4 and 6. Represents the minimum amount of shadows needed to retrieve the secret in a (k, n) scheme. \n");
+    printlnb("directory: ");
+    printlnu("Directory with the images that contain the secret. Must contain images with a '.bmp' extension, 8 bits per pixel and equal in size to the secret image. \n");
+    printlnb("\nExample:\n");
+    printlcn("./TP_Cripto r imageRevealed.bmp 4 images/\n");
     exit(1);
 }
 
@@ -80,7 +102,7 @@ void parseArgs(int argc, char **argv, struct config * config) {
         fprintf(stderr, "Arguments needed to execute. Try h for help.\n");
         exit(1);
     } else if(argc == 2 && strcmp(argv[1], "h") == 0) {
-        usage();
+        help();
         exit(0);
     } else if(argc == 5) {
         for(int i = 0 ; i < 4 ; i++) {
