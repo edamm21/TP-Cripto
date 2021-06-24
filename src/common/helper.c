@@ -245,14 +245,6 @@ bool checkParityBit(char * T_I_J, char parityBit) {
     return calculateParityBit(T_I_J) == parityBit;
 }
 
-void printBlock(uint8_t * block, int k) {
-    for(int i = 0 ; i < k ; i++) {
-        printf("%x - ", block[i]);
-    }
-    printf("\n");
-}
-
-
 uint8_t * calculateLagrange(uint8_t * X, uint8_t * Y, int k) {
     uint8_t * polynomial = malloc(k * sizeof(uint8_t));
     memset(polynomial,0,k);

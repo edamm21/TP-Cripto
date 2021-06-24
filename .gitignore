@@ -55,6 +55,7 @@ cmake-build-debug/
 cmake-build-debug-cmake/
 Testing/
 CMakeCache.txt
-TP_Cripto
-TP_Cripto.cbp
+ss
+ss.cbp
 Makefile
+*.bmp

@@ -10,7 +10,6 @@
 #include "header_struct.h"
 
 void runDistribution(struct config *config) {
-    printf("Distributing image...\n");
     long fileSize;
     uint8_t *fileData = readFile(config->imageFile, &fileSize);
     if (fileData == NULL)

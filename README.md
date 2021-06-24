@@ -10,10 +10,10 @@ Se puede instalar siguiendo los simples pasos que se encuentran en https://cgold
 
 ###Para distribuir una imagen secreta en otras imágenes:
 
-> ./TP_Cripto d imagenSecreta k directorio
+> ./ss d imagenSecreta k directorio
 
 Ejemplo:
-> ./TP_Cripto d imageToHide.bmp 4 images/
+> ./ss d imageToHide.bmp 4 images/
 
 Significado de los argumentos:
 - imagenSecreta: Archivo de extension .bmp, este archivo debe existir, es la imagen a ocultar y debe ser en blanco y negro.
@@ -26,10 +26,10 @@ Significado de los argumentos:
 
 ###Para recuperar una imagen secreta a partir de otras imágenes:
 
-> ./TP_Cripto r imagenSecreta k directorio
+> ./ss r imagenSecreta k directorio
 
 Ejemplo:
-> ./TP_Cripto r imageRevealed.bmp 4 images/
+> ./ss imageRevealed.bmp 4 images/
 
 Significado de los argumentos:
 - imagenSecreta: Archivo de extension .bmp, será el archivo de salida, con la imagen secreta revelada al finalizar el programa.

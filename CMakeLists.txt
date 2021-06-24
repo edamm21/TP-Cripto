@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.16)
-project(TP_Cripto)
+project(ss)
 
 set(CMAKE_C_STANDARD 11)
 
 include_directories(src)
 
-add_executable(TP_Cripto
+add_executable(ss
         src/main.c
         src/args_parser.c
         src/distribution.c
@@ -18,4 +18,4 @@ add_executable(TP_Cripto
         src/common/galois.c
         src/common/galois.h)
 
-target_link_libraries(TP_Cripto m)
+target_link_libraries(ss m)

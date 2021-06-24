@@ -6,7 +6,6 @@
 #include "finding.h"
 
 void runFinding(struct config * config) {
-    printf("Finding hidden image...\n");
     uint8_t * headerForCopying = NULL;
     long matrixCount;
     struct header headerStruct;
