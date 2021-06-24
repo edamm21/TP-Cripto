@@ -2,6 +2,7 @@
 #define FINDING_H
 #include <stdint.h>
 #include "config.h"
+#include "header_struct.h"
 
 void runFinding(struct config * config);
 uint8_t ** recoverSecretData(uint8_t *** shades, int k, long matrixCount, long blockCount);
