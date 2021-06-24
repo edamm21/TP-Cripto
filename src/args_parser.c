@@ -26,7 +26,7 @@ static void help() {
     printlnb("directory: ");
     printlnu("Directory with the images used to distribute the secret. Must contain images with a '.bmp' extension, 8 bits per pixel and equal in size to the secret image.\n");
     printlnb("\nExample:\n");
-    printlcn("./TP_Cripto d imageToHide.bmp 4 images/\n");
+    printlcn("./ss d imageToHide.bmp 4 images/\n");
 
     printlgu("\nRecovery mode mandatory parameters:\n");
     printlnb("r: ");
@@ -38,7 +38,7 @@ static void help() {
     printlnb("directory: ");
     printlnu("Directory with the images that contain the secret. Must contain images with a '.bmp' extension, 8 bits per pixel and equal in size to the secret image. \n");
     printlnb("\nExample:\n");
-    printlcn("./TP_Cripto r imageRevealed.bmp 4 images/\n");
+    printlcn("./ss r imageRevealed.bmp 4 images/\n");
     exit(EXIT_SUCCESS);
 }
 
